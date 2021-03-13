@@ -16,8 +16,8 @@ Graph::Graph(int _pair_count) :
 pair_count{_pair_count}, 
 balls{std::vector<Point>(_pair_count)},
 holes{std::vector<Point>(_pair_count)},
-edges{std::vector<Edge>(_pair_count)} {
-    srand(111);
+lines{std::vector<Line>(_pair_count)} {
+    srand(115);
     Random r;
     for (std::size_t i = 0; i < _pair_count; i++) {
         balls[i].x = r.next_double(10);
@@ -30,19 +30,20 @@ edges{std::vector<Edge>(_pair_count)} {
     
     // random matching
     for(std::size_t i = 0; i < _pair_count; i++) {
-        edges[i].A = holes[i];
-        edges[i].B = balls[i];
-        edges[i].dist = edges[i].distance();
+        lines[i].A = holes[i];
+        lines[i].B = balls[i];
+        lines[i].dist = lines[i].distance();
     }
 }
 
 void Graph::print() const noexcept {
     fmt::print("Connections:\n");
     for (std::size_t i = 0; i < pair_count; ++i) {
-        fmt::print("connection {}:\t{}-{}\t [A,B] = [({:.2f}, {:.2f}), ({:.2f}, {:.2f})]\t dist: {:.2f}\n", i, edges[i].A.nr, edges[i].B.nr, edges[i].A.x, edges[i].A.y, edges[i].B.x, edges[i].B.y, edges[i].dist);
+        fmt::print("connection {}:\t{}-{}\t [A,B] = [({:.2f}, {:.2f}), ({:.2f}, {:.2f})]\t dist: {:.2f}\n", i, lines[i].A.nr, lines[i].B.nr, lines[i].A.x, lines[i].A.y, lines[i].B.x, lines[i].B.y, lines[i].dist);
     }
 }
 
-// void Graph::connect(std::size_t a, size_t b, Edge e) {}
+void Graph::intersects(Line l1, Line l2) {}
+// void Graph::connect(std::size_t a, size_t b, Line e) {}
 
 } // namespace golf::ebm

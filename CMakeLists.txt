@@ -33,8 +33,10 @@ include_directories(./include)
 
 add_subdirectory(src/EBM)
 add_subdirectory(src/Test)
+add_subdirectory(QtGui)
 add_executable(${PROJECT_NAME} 
-        main.cpp
+        Main.cpp
+        # QtGui/main.cpp
         src/EBM/Graph.cpp
         src/EBM/Assignment.cpp)
 target_link_libraries(golf PUBLIC fmt spdlog)

@@ -13,7 +13,7 @@ struct Point {
     std::size_t nr;
 };
 
-struct Edge {
+struct Line {
     Point A, B;
     double dist;
     [[nodiscard]] constexpr double distance() const noexcept {
@@ -26,13 +26,14 @@ class Graph {
     std::vector<Point> balls;
     std::vector<Point> holes;
     int pair_count;
-    std::vector<Edge> edges;
+    std::vector<Line> lines;
 
 public:
     Graph(int pair_count);
     
     void print() const noexcept;
-    // void connect(std::size_t a, size_t b, Edge e);
+    // void connect(std::size_t a, size_t b, Line l);
+    void intersects(Line l1, Line l2);
 };
 
 } // namespace golf::ebm

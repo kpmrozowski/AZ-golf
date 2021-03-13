@@ -1,0 +1,4 @@
+/home/mro/Documents/pw_mini/az/AZ-golf/build-QtGui-Desktop-Debug/CMakeFiles/rebuild_cache.dir
+/home/mro/Documents/pw_mini/az/AZ-golf/build-QtGui-Desktop-Debug/CMakeFiles/edit_cache.dir
+/home/mro/Documents/pw_mini/az/AZ-golf/build-QtGui-Desktop-Debug/CMakeFiles/QtGui.dir
+/home/mro/Documents/pw_mini/az/AZ-golf/build-QtGui-Desktop-Debug/CMakeFiles/QtGui_autogen.dir
