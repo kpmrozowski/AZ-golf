@@ -94,6 +94,7 @@ for x in range((len(connections))):
             c1 = connections[x]
             c2 = connections[y]
             if(c1.intersects(c2)):
+                print("Wykryto przecięcie:")
                 print(f"{x} {y}")
                 print(f"{c1} # {c2}")
 
