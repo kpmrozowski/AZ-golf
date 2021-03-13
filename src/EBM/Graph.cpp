@@ -1,4 +1,5 @@
 #include <EBM/Graph.h>
+#include <spdlog/spdlog.h>
 
 namespace golf::ebm {
     
@@ -22,6 +23,12 @@ pairs {std::vector<std::pair<Point, Point>>(_pair_count)} {
         holes[i].y = r.next_double(10);
         balls[i].x = r.next_double(10);
         balls[i].y = r.next_double(10);
+    }
+    
+    // random matching
+    for(std::size_t i = 0; i < _pair_count; i++) {
+        pairs[i].first = holes[i];
+        pairs[i].second = balls[i];
     }
 }
 

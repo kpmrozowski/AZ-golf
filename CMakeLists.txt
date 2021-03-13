@@ -6,12 +6,6 @@ set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wpedantic")
 
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
-set(CMAKE_AUTOUIC ON)
-
-find_package(Qt5 COMPONENTS Widgets REQUIRED)
-
 include(FetchContent)
 
 FetchContent_Declare(
@@ -43,4 +37,4 @@ add_executable(${PROJECT_NAME}
         main.cpp
         src/EBM/Graph.cpp
         src/EBM/Assignment.cpp)
-target_link_libraries(golf PUBLIC fmt)
+target_link_libraries(golf PUBLIC fmt spdlog)
