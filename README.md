@@ -3,7 +3,10 @@ The Euclidean Bipartitle Matching algorithm for a golfer-hole problem in c++ cpp
 
 # Euclidean Bipartite Matching
 
-This repository holds a solution to a problem, which can be reconstructed as a euclidean bipartite matching problem, which me and my friend were tasked to solve. Two versions of the code are provided - one with comments, and one without. The remainer of this README is an explanation of the Problem. The paper regarding the problem, algorithm, results, complexities and proofs is also provided as [paper.pdf](paper.pdf).
+This repository holds a solution to a problem, which can be reconstructed as a euclidean bipartite matching problem, which me and my friend were tasked to solve. 
+
+To do:
+Two versions of the code are provided - one with comments, and one without. The remainer of this README is an explanation of the Problem. The paper regarding the problem, algorithm, results, complexities and proofs is also provided as [paper.pdf](paper.pdf).
 
 
 ## Problem
