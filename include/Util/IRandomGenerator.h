@@ -1,5 +1,5 @@
-#ifndef CVRP_IRANDOMGENERATOR_H
-#define CVRP_IRANDOMGENERATOR_H
+#ifndef UTIL_IRANDOMGENERATOR_H
+#define UTIL_IRANDOMGENERATOR_H
 
 namespace golf::util {
 
@@ -11,4 +11,4 @@ class IRandomGenerator {
 
 }
 
-#endif//CVRP_IRANDOMGENERATOR_H
+#endif//UTIL_IRANDOMGENERATOR_H

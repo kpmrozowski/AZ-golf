@@ -7,18 +7,23 @@
 
 namespace golf::ebm {
 
+struct Point {
+    double x, y;
+};
+
 struct Edge {
-    double x;
-    double y;
+    Point A, B;
     [[nodiscard]] constexpr double distance() const noexcept {
-        return std::pow(std::pow(x, 2) + std::pow(y, 2), 0.5);
+        return std::pow(std::pow(A.x - B.x, 2) + std::pow(A.y - B.y, 2), 0.5);
     }
 };
 
 class Graph {
-
+    
+    std::vector<Point> balls;
+    std::vector<Point> holes;
     std::size_t pair_count;
-    std::vector<std::pair<std::size_t, std::size_t>> pairs;
+    std::vector<std::pair<Point, Point>> pairs;
 
 public:
     Graph(std::size_t pair_count);
