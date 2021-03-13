@@ -17,7 +17,7 @@ pair_count{_pair_count},
 balls{std::vector<Point>(_pair_count)},
 holes{std::vector<Point>(_pair_count)},
 edges{std::vector<Edge>(_pair_count)} {
-    srand(800);
+    srand(111);
     Random r;
     for (std::size_t i = 0; i < _pair_count; i++) {
         balls[i].x = r.next_double(10);
@@ -39,7 +39,7 @@ edges{std::vector<Edge>(_pair_count)} {
 void Graph::print() const noexcept {
     fmt::print("Connections:\n");
     for (std::size_t i = 0; i < pair_count; ++i) {
-        fmt::memory_buffer("connection {}:\t{}-{}\t [A,B] = [ ({}, {}), ({}, {}) ]\t dist: {}\n", i, edges[i].A.nr, edges[i].B.nr, edges[i].A.x, edges[i].A.y, edges[i].B.x, edges[i].B.y, edges[i].dist);
+        fmt::print("connection {}:\t{}-{}\t [A,B] = [({:.2f}, {:.2f}), ({:.2f}, {:.2f})]\t dist: {:.2f}\n", i, edges[i].A.nr, edges[i].B.nr, edges[i].A.x, edges[i].A.y, edges[i].B.x, edges[i].B.y, edges[i].dist);
     }
 }
 
