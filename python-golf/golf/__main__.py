@@ -89,15 +89,19 @@ def change_coordinate_system(points, m, b):
         new_coordinates[i] = np.array([points[i][0], uv_point[0], uv_point[1]])
     return new_coordinates
 
-def divide_into_subproblems(sorted_points, connections):
+def divide_into_subproblems(sorted_points, connections, nn, balls_uv, holes_uv):
     pivot_index = -1 # After which point there's a division to two subproblems
     n = sorted_points.shape[0] / 2
 
-    subproblem_holes = sorted_points[sorted_points[:,0] >= n]
-    subproblem_balls = sorted_points[sorted_points[:,0] < n]
+    subproblem_holes = sorted_points[sorted_points[:,0] >= nn]
+    subproblem_balls = sorted_points[sorted_points[:,0] < nn]
 
     if n == 1: # One connection
-        connections.append([subproblem_balls[0,0], subproblem_holes[0,0]])
+        b1 = Point(subproblem_balls[0,1], subproblem_balls[0,2])
+        h1 = Point(subproblem_holes[0,1], subproblem_holes[0,2])
+        connections.append([b1, h1])
+
+        plot_connections(balls_uv, holes_uv, connections)
     elif n == 2: # Two connections
         b1 = Point(subproblem_balls[0,1], subproblem_balls[0,2])
         b2 = Point(subproblem_balls[1,1], subproblem_balls[1,2])
@@ -110,6 +114,8 @@ def divide_into_subproblems(sorted_points, connections):
         else:
             connections.append([b1, h2])
             connections.append([b2, h1]) # Reversed
+
+        plot_connections(balls_uv, holes_uv, connections)
     elif n == 3:
         b1 = Point(subproblem_balls[0,1], subproblem_balls[0,2])
         b2 = Point(subproblem_balls[1,1], subproblem_balls[1,2])
@@ -123,6 +129,8 @@ def divide_into_subproblems(sorted_points, connections):
         connections.append([b2, h2])
         connections.append([b3, h3])
 
+        plot_connections(balls_uv, holes_uv, connections)
+
         for con1 in connections:
             for con2 in connections:
                 if con1 != con2:
@@ -133,7 +141,7 @@ def divide_into_subproblems(sorted_points, connections):
         pivot_found = False
 
         for i in range(2 * int(n)):
-            if sorted_points[i, 0] >= n:
+            if sorted_points[i, 0] >= nn:
                 holes_left_count = holes_left_count + 1
             else:
                 balls_left_count = balls_left_count + 1
@@ -143,12 +151,15 @@ def divide_into_subproblems(sorted_points, connections):
                 pivot_found = True
                 pivot_index = i
                 subproblem_left = sorted_points[0:i+1,:]
-                subproblem_right = sorted_points[i:,:]
+                subproblem_right = sorted_points[i+1:,:]
 
-                divide_into_subproblems(subproblem_left, connections)
-                divide_into_subproblems(subproblem_right, connections)
+                divide_into_subproblems(subproblem_left, connections, nn, balls_uv, holes_uv)
+                divide_into_subproblems(subproblem_right, connections, nn, balls_uv, holes_uv)
 
                 break
+        
+        if not pivot_found:
+            
 
 def main():
     args = parse_arguments()
@@ -188,7 +199,8 @@ def main():
     plot_data(balls_uv, holes_uv)
 
     connections = []
-    divide_into_subproblems(points_all_byY, connections)
+    nn = points_all_byY.shape[0] / 2
+    divide_into_subproblems(points_all_byY, connections, nn, balls_uv, holes_uv)
     
     plot_connections(balls_uv, holes_uv, connections)
 
