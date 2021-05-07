@@ -89,12 +89,12 @@ def change_coordinate_system(points, m, b):
         new_coordinates[i] = np.array([points[i][0], uv_point[0], uv_point[1]])
     return new_coordinates
 
-def divide_into_subproblems(sorted_points, connections, nn, balls_uv, holes_uv):
+def divide_into_subproblems(sorted_points_by_x, connections, nn, balls_uv, holes_uv):
     pivot_index = -1 # After which point there's a division to two subproblems
-    n = sorted_points.shape[0] / 2
+    n = sorted_points_by_x.shape[0] / 2
 
-    subproblem_holes = sorted_points[sorted_points[:,0] >= nn]
-    subproblem_balls = sorted_points[sorted_points[:,0] < nn]
+    subproblem_holes = sorted_points_by_x[sorted_points_by_x[:,0] >= nn]
+    subproblem_balls = sorted_points_by_x[sorted_points_by_x[:,0] < nn]
 
     if n == 1: # One connection
         b1 = Point(subproblem_balls[0,1], subproblem_balls[0,2])
@@ -141,25 +141,46 @@ def divide_into_subproblems(sorted_points, connections, nn, balls_uv, holes_uv):
         pivot_found = False
 
         for i in range(2 * int(n)):
-            if sorted_points[i, 0] >= nn:
+            if sorted_points_by_x[i, 0] >= nn:
                 holes_left_count = holes_left_count + 1
             else:
                 balls_left_count = balls_left_count + 1
 
             if balls_left_count == holes_left_count:
-                print('PIVOT FOUND by y')
+                print('PIVOT FOUND by X')
                 pivot_found = True
                 pivot_index = i
-                subproblem_left = sorted_points[0:i+1,:]
-                subproblem_right = sorted_points[i+1:,:]
-
-                divide_into_subproblems(subproblem_left, connections, nn, balls_uv, holes_uv)
-                divide_into_subproblems(subproblem_right, connections, nn, balls_uv, holes_uv)
-
+                subproblem_left = sorted_points_by_x[0:i+1,:]
+                subproblem_right = sorted_points_by_x[i+1:,:]
                 break
-        
-        if not pivot_found:
             
+        if len(subproblem_left) == 0 or len(subproblem_right) == 0:
+            print("EMPTY SUBPROBLEM, attempting to sort by y")
+            pivot_found = False
+
+        if not pivot_found:
+            balls_left_count = 0
+            holes_left_count = 0
+            pivot_found = False
+
+            sorted_points_by_y = sorted_points_by_x[sorted_points_by_x[:,2].argsort(kind='mergesort')]
+        
+            for i in range(2 * int(n)):
+                if sorted_points_by_y[i, 0] >= nn:
+                    holes_left_count = holes_left_count + 1
+                else:
+                    balls_left_count = balls_left_count + 1
+
+                if balls_left_count == holes_left_count:
+                    print('PIVOT FOUND by X')
+                    pivot_found = True
+                    pivot_index = i
+                    subproblem_left = sorted_points_by_y[0:i+1,:]
+                    subproblem_right = sorted_points_by_y[i+1:,:]
+                    break
+
+        divide_into_subproblems(subproblem_left, connections, nn, balls_uv, holes_uv)
+        divide_into_subproblems(subproblem_right, connections, nn, balls_uv, holes_uv)
 
 def main():
     args = parse_arguments()
@@ -200,7 +221,7 @@ def main():
 
     connections = []
     nn = points_all_byY.shape[0] / 2
-    divide_into_subproblems(points_all_byY, connections, nn, balls_uv, holes_uv)
+    divide_into_subproblems(points_all_byX, connections, nn, balls_uv, holes_uv)
     
     plot_connections(balls_uv, holes_uv, connections)
 
