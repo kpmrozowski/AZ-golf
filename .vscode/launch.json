@@ -9,7 +9,7 @@
             "type": "python",
             "request": "launch",
             "module": "golf",
-            "args": ["15"],
+            "args": ["50"],
             "cwd": "${workspaceFolder}/python-golf"
         }
     ]

@@ -48,7 +48,13 @@ def plot_connections(balls, holes, connections):
         plt.annotate(str(n + i), (np.transpose(holes)[1][i]+.01, np.transpose(holes)[2][i]+.01), fontsize=12)
 
     for con in connections:
-        plt.plot([con[0].x,con[1].x], [con[0].y,con[1].y])
+        i1 = int(con[0])
+        i2 = int(con[1])-n
+
+        ball = balls[i1,:]
+        hole = holes[i2,:]
+
+        plt.plot([ball[1],hole[1]], [ball[2],hole[2]])
 
     plt.show()
 
@@ -89,59 +95,85 @@ def change_coordinate_system(points, m, b):
         new_coordinates[i] = np.array([points[i][0], uv_point[0], uv_point[1]])
     return new_coordinates
 
-def divide_into_subproblems(sorted_points_by_x, connections, nn, balls_uv, holes_uv):
+def divide_into_subproblems(sorted_points, connections, nn, balls_uv, holes_uv):
     pivot_index = -1 # After which point there's a division to two subproblems
-    n = sorted_points_by_x.shape[0] / 2
-
-    subproblem_holes = sorted_points_by_x[sorted_points_by_x[:,0] >= nn]
-    subproblem_balls = sorted_points_by_x[sorted_points_by_x[:,0] < nn]
+    n = int(sorted_points.shape[0] / 2) # current subproblem size
+    # nn - total subproblem size
+    # nn = points_all_byY.shape[0] / 2
+    subproblem_holes = sorted_points[sorted_points[:,0] >= nn]
+    subproblem_balls = sorted_points[sorted_points[:,0] < nn]
 
     if n == 1: # One connection
-        b1 = Point(subproblem_balls[0,1], subproblem_balls[0,2])
-        h1 = Point(subproblem_holes[0,1], subproblem_holes[0,2])
-        connections.append([b1, h1])
-
-        plot_connections(balls_uv, holes_uv, connections)
+        b1_index = subproblem_balls[0,0]
+        h1_index = subproblem_holes[0,0]
+        connections.append([b1_index, h1_index])
     elif n == 2: # Two connections
         b1 = Point(subproblem_balls[0,1], subproblem_balls[0,2])
         b2 = Point(subproblem_balls[1,1], subproblem_balls[1,2])
         h1 = Point(subproblem_holes[0,1], subproblem_holes[0,2])
         h2 = Point(subproblem_holes[1,1], subproblem_holes[1,2])
 
+        b1_index = subproblem_balls[0,0]
+        b2_index = subproblem_balls[1,0]
+        h1_index = subproblem_holes[0,0]
+        h2_index = subproblem_holes[1,0]
+
         if not doIntersect(b1, h1, b2, h2):
-            connections.append([b1, h1])
-            connections.append([b2, h2])
+            connections.append([b1_index, h1_index])
+            connections.append([b2_index, h2_index])
         else:
-            connections.append([b1, h2])
-            connections.append([b2, h1]) # Reversed
+            connections.append([b1_index, h2_index])
+            connections.append([b2_index, h1_index]) # Reverse
+    # elif n == 3:
+    #     b1 = Point(subproblem_balls[0,1], subproblem_balls[0,2])
+    #     b2 = Point(subproblem_balls[1,1], subproblem_balls[1,2])
+    #     b3 = Point(subproblem_balls[2,1], subproblem_balls[2,2])
 
-        plot_connections(balls_uv, holes_uv, connections)
-    elif n == 3:
-        b1 = Point(subproblem_balls[0,1], subproblem_balls[0,2])
-        b2 = Point(subproblem_balls[1,1], subproblem_balls[1,2])
-        b3 = Point(subproblem_balls[2,1], subproblem_balls[2,2])
+    #     h1 = Point(subproblem_holes[0,1], subproblem_holes[0,2])
+    #     h2 = Point(subproblem_holes[1,1], subproblem_holes[1,2])
+    #     h3 = Point(subproblem_holes[2,1], subproblem_holes[2,2])
 
-        h1 = Point(subproblem_holes[0,1], subproblem_holes[0,2])
-        h2 = Point(subproblem_holes[1,1], subproblem_holes[1,2])
-        h3 = Point(subproblem_holes[2,1], subproblem_holes[2,2])
+    #     connections.append([b1, h1])
+    #     connections.append([b2, h2])
+    #     connections.append([b3, h3])
 
-        connections.append([b1, h1])
-        connections.append([b2, h2])
-        connections.append([b3, h3])
+    #     plot_connections(balls_uv, holes_uv, connections)
 
-        plot_connections(balls_uv, holes_uv, connections)
-
-        for con1 in connections:
-            for con2 in connections:
-                if con1 != con2:
-                    print(doIntersect(con1[0], con1[1], con2[0], con2[1]))
+    #     for con1 in connections:
+    #         for con2 in connections:
+    #             if con1 != con2:
+    #                 print(doIntersect(con1[0], con1[1], con2[0], con2[1]))
     else:
+        [m, b] = get_mass_center_line_coefficients(subproblem_balls, subproblem_holes)
+
+        balls_uv = change_coordinate_system(subproblem_balls, m, b)
+        holes_uv = change_coordinate_system(subproblem_holes, m, b)
+
+        subproblem_balls = balls_uv
+        subproblem_holes = holes_uv
+
+        print('balls_uv = \t\t\t\tholes_uv =')
+        for i in range(n):
+            print('{} \t {}'.format(balls_uv[i], holes_uv[i]))
+        points_all = np.concatenate((balls_uv, holes_uv)) 
+        points_all_byX = points_all[points_all[:,1].argsort(kind='mergesort')]
+        points_all_byY = points_all[points_all[:,2].argsort(kind='mergesort')]
+
+        print('\npoints_all_byX = \t\t\tpoints_all_byY =')
+
+        for i in range(2*n):
+            print('{} \t {}'.format(points_all_byX[i], points_all_byY[i]))
+
+        plot_data(subproblem_balls, subproblem_holes)
+
         balls_left_count = 0
         holes_left_count = 0
         pivot_found = False
 
+        sorted_points = points_all_byX
+
         for i in range(2 * int(n)):
-            if sorted_points_by_x[i, 0] >= nn:
+            if sorted_points[i, 0] >= nn:
                 holes_left_count = holes_left_count + 1
             else:
                 balls_left_count = balls_left_count + 1
@@ -150,8 +182,8 @@ def divide_into_subproblems(sorted_points_by_x, connections, nn, balls_uv, holes
                 print('PIVOT FOUND by X')
                 pivot_found = True
                 pivot_index = i
-                subproblem_left = sorted_points_by_x[0:i+1,:]
-                subproblem_right = sorted_points_by_x[i+1:,:]
+                subproblem_left = sorted_points[0:i+1,:]
+                subproblem_right = sorted_points[i+1:,:]
                 break
             
         if len(subproblem_left) == 0 or len(subproblem_right) == 0:
@@ -163,7 +195,7 @@ def divide_into_subproblems(sorted_points_by_x, connections, nn, balls_uv, holes
             holes_left_count = 0
             pivot_found = False
 
-            sorted_points_by_y = sorted_points_by_x[sorted_points_by_x[:,2].argsort(kind='mergesort')]
+            sorted_points_by_y = sorted_points[sorted_points[:,2].argsort(kind='mergesort')]
         
             for i in range(2 * int(n)):
                 if sorted_points_by_y[i, 0] >= nn:
@@ -184,6 +216,8 @@ def divide_into_subproblems(sorted_points_by_x, connections, nn, balls_uv, holes
 
 def main():
     args = parse_arguments()
+
+    np.random.seed(4)
 
     n = int(args.n)
     silent_mode = True if args.silent_mode else False
@@ -220,8 +254,9 @@ def main():
     plot_data(balls_uv, holes_uv)
 
     connections = []
-    nn = points_all_byY.shape[0] / 2
-    divide_into_subproblems(points_all_byX, connections, nn, balls_uv, holes_uv)
+    nn = int(points_all_byX.shape[0] / 2)
+    points = np.concatenate((balls, holes))
+    divide_into_subproblems(points_all_byX, connections, nn, balls, holes)
     
     plot_connections(balls_uv, holes_uv, connections)
 
