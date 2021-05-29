@@ -29,13 +29,65 @@ def generate_data(n):
 
 def plot_data(balls, holes):
     n = balls.shape[0]
-    plt.scatter(np.transpose(balls)[:][1], np.transpose(balls)[:][2])
-    plt.scatter(np.transpose(holes)[:][1], np.transpose(holes)[:][2])
+
+    plt.scatter(np.transpose(balls)[:][1], np.transpose(balls)[:][2], c="tab:blue")
+    plt.scatter(np.transpose(holes)[:][1], np.transpose(holes)[:][2], c="tab:orange")
 
     for i in range(n):
-        plt.annotate(str(i), (np.transpose(balls)[1][i]+.001, np.transpose(balls)[2][i]+.001), fontsize=8)
-        plt.annotate(str(n + i), (np.transpose(holes)[1][i]+.001, np.transpose(holes)[2][i]+.001), fontsize=8)
+        plt.annotate(str(int(balls[i,0])), (np.transpose(balls)[1][i]+.001, np.transpose(balls)[2][i]+.001), fontsize=8)
+        plt.annotate(str(int(holes[i,0])), (np.transpose(holes)[1][i]+.001, np.transpose(holes)[2][i]+.001), fontsize=8)
 
+    # for i in range(n):
+
+    balls_center = get_mass_center(balls)
+    holes_center = get_mass_center(holes)
+    x_center = [balls_center[0], holes_center[0]]
+    y_center = [balls_center[1], holes_center[1]]
+
+    plt.scatter(x_center[0], y_center[0], c="tab:blue", marker="D", label="Środek ciężkości piłek")
+    plt.scatter(x_center[1], y_center[1], c="tab:orange", marker="D", label="Środek ciężkości dołków")
+
+    plt.plot(x_center, y_center, 'k--')
+
+    # [m, b] = get_mass_center_line_coefficients(balls, holes)
+
+    plt.legend()
+    plt.show()
+
+def plot_data_with_pivot(balls, holes, left_subproblem, sorted_by):
+    n = balls.shape[0]
+
+    plt.scatter(np.transpose(balls)[:][1], np.transpose(balls)[:][2], c="tab:blue")
+    plt.scatter(np.transpose(holes)[:][1], np.transpose(holes)[:][2], c="tab:orange")
+
+    for i in range(n):
+        plt.annotate(str(int(balls[i,0])), (np.transpose(balls)[1][i]+.001, np.transpose(balls)[2][i]+.001), fontsize=8)
+        plt.annotate(str(int(holes[i,0])), (np.transpose(holes)[1][i]+.001, np.transpose(holes)[2][i]+.001), fontsize=8)
+
+    # for i in range(n):
+
+    balls_center = get_mass_center(balls)
+    holes_center = get_mass_center(holes)
+    x_center = [balls_center[0], holes_center[0]]
+    y_center = [balls_center[1], holes_center[1]]
+
+    plt.scatter(x_center[0], y_center[0], c="tab:blue", marker="D", label="Środek ciężkości piłek")
+    plt.scatter(x_center[1], y_center[1], c="tab:orange", marker="D", label="Środek ciężkości dołków")
+
+    plt.plot(x_center, y_center, 'k--')
+
+    max_x = min(left_subproblem[:,1])
+    max_y = min(left_subproblem[:,2])
+
+    if sorted_by == "y":
+        x = [0,1]
+        y = [max_y, max_y]
+        plt.plot(x, y, 'k--', label="test")
+
+
+    # [m, b] = get_mass_center_line_coefficients(balls, holes)
+
+    plt.legend()
     plt.show()
 
 def to_point(custom_point):
@@ -69,10 +121,13 @@ def plot_connections(balls, holes, connections):
     # check_intersections(balls, holes, connections)
     plt.show()
 
+def get_mass_center(points):
+    return [np.mean(np.transpose(points)[1][:]), np.mean(np.transpose(points)[2][:])]
+
 def get_mass_center_line_coefficients(balls, holes):
-    balls_center = [np.mean(np.transpose(balls)[1][:]), np.mean(np.transpose(balls)[2][:])]
+    balls_center = get_mass_center(balls)
     if not silent_mode: print('balls_center = [{:.2f}, {:.2f}]'.format(balls_center[0], balls_center[1]))
-    holes_center = [np.mean(np.transpose(holes)[1][:]), np.mean(np.transpose(holes)[2][:])]
+    holes_center = get_mass_center(holes)
     if not silent_mode: print('holes_center = [{:.2f}, {:.2f}]'.format(holes_center[0], holes_center[1]))
 
     # y = m*x + b
@@ -110,7 +165,7 @@ def change_coordinate_system(points, m, b):
     return new_coordinates
 
 def add_new_connection(connections, ball_index, hole_index):
-    if not silent_mode: print(f"  Connection: Ball {ball_index} -> Hole {hole_index}")
+    print(f"  Connection: Ball {ball_index} -> Hole {hole_index}")
     connections.append([ball_index, hole_index])
 
 def divide_into_subproblems(sorted_points, connections, nn, balls_uv, holes_uv):
@@ -120,7 +175,7 @@ def divide_into_subproblems(sorted_points, connections, nn, balls_uv, holes_uv):
     subproblem_holes = sorted_points[sorted_points[:,0] >= nn]
     subproblem_balls = sorted_points[sorted_points[:,0] < nn]
 
-    if not silent_mode: print(f"Subproblem: pairs={n}, points={2*n}")
+    print(f"Subproblem: pairs={n}, points={2*n}")
 
     if n == 1: # One connection
         b1_index = int(subproblem_balls[0,0])
@@ -171,6 +226,8 @@ def divide_into_subproblems(sorted_points, connections, nn, balls_uv, holes_uv):
         subproblem_balls = balls_uv
         subproblem_holes = holes_uv
 
+        #plot_data(balls_uv, holes_uv)
+
         points_all = np.concatenate((balls_uv, holes_uv)) 
         points_all_byX = points_all[points_all[:,1].argsort(kind='mergesort')]
         points_all_byY = points_all[points_all[:,2].argsort(kind='mergesort')]
@@ -187,7 +244,7 @@ def divide_into_subproblems(sorted_points, connections, nn, balls_uv, holes_uv):
         holes_left_count = 0
         pivot_found = False
 
-        sorted_points = points_all_byX
+        sorted_points = points_all_byY
 
         for i in range(2 * int(n)):
             if sorted_points[i, 0] >= nn:
@@ -198,38 +255,41 @@ def divide_into_subproblems(sorted_points, connections, nn, balls_uv, holes_uv):
             if balls_left_count == holes_left_count:
                 pivot_found = True
                 pivot_index = i
+
+                # plot_data_with_pivot(subproblem_balls, subproblem_holes, sorted_points[0:pivot_index+1], "y")
+
                 subproblem_left = sorted_points[0:i+1,:]
                 subproblem_right = sorted_points[i+1:,:]
-                if not silent_mode:
-                    print(f"  Pivot found by X: Left={len(subproblem_left)},Right={len(subproblem_right)}")
+                print(f"  Pivot found by X: Left={len(subproblem_left)},Right={len(subproblem_right)}")
                 break
             
-        if len(subproblem_left) == 0 or len(subproblem_right) == 0:
-            if not silent_mode:
-                print(f"  Empty subproblem found. Attempting to find connections by Y.")
-            pivot_found = False
+        # if len(subproblem_left) == 0 or len(subproblem_right) == 0:
+        #     print(f"  Empty subproblem found. Attempting to find connections by Y.")
+        #     pivot_found = False
 
-        if not pivot_found:
-            balls_left_count = 0
-            holes_left_count = 0
-            pivot_found = False
+        # if not pivot_found:
+        #     balls_left_count = 0
+        #     holes_left_count = 0
+        #     pivot_found = False
 
-            sorted_points_by_y = sorted_points[sorted_points[:,2].argsort(kind='mergesort')]
+        #     sorted_points_by_y = sorted_points[sorted_points[:,2].argsort(kind='mergesort')]
         
-            for i in range(2 * int(n)):
-                if sorted_points_by_y[i, 0] >= nn:
-                    holes_left_count = holes_left_count + 1
-                else:
-                    balls_left_count = balls_left_count + 1
+        #     for i in range(2 * int(n)):
+        #         if sorted_points_by_y[i, 0] >= nn:
+        #             holes_left_count = holes_left_count + 1
+        #         else:
+        #             balls_left_count = balls_left_count + 1
 
-                if balls_left_count == holes_left_count:
-                    if not silent_mode:
-                        print(f"  Pivot found by Y: Left={len(subproblem_left)},Right={len(subproblem_right)}")
-                    pivot_found = True
-                    pivot_index = i
-                    subproblem_left = sorted_points_by_y[0:i+1,:]
-                    subproblem_right = sorted_points_by_y[i+1:,:]
-                    break
+        #         if balls_left_count == holes_left_count:
+        #             if not silent_mode:
+        #                 print(f"  Pivot found by Y: Left={len(subproblem_left)},Right={len(subproblem_right)}")
+        #             pivot_found = True
+        #             pivot_index = i
+
+        #             #plot_data_with_pivot(subproblem_balls, subproblem_holes, sorted_points[0:pivot_index+1], "x")
+        #             subproblem_left = sorted_points_by_y[0:i+1,:]
+        #             subproblem_right = sorted_points_by_y[i+1:,:]
+        #             break
 
         divide_into_subproblems(subproblem_left, connections, nn, balls_uv, holes_uv)
         divide_into_subproblems(subproblem_right, connections, nn, balls_uv, holes_uv)
@@ -287,8 +347,8 @@ def main():
     points = np.concatenate((balls, holes))
     divide_into_subproblems(points_all_byX, connections, nn, balls, holes)
     
-    if not silent_mode:               
-        plot_connections(balls, holes, connections)
+    # if not silent_mode:               
+    plot_connections(balls, holes, connections)
 
 if __name__ == '__main__':
     # execute only if run as the entry point into the program
