@@ -75,15 +75,15 @@ def introduce_variance(balls, holes):
     random.seed()
 
     for i in range(0, len(balls)):
-        random_value = random.randint(-5, 5) * e
+        random_value = random.randint(-1, 1) * e
         balls[i, 1] = balls[i, 1] + random_value
-        random_value = random.randint(-5, 5) * e
+        random_value = random.randint(-1, 1) * e
         balls[i, 2] = balls[i, 2] + random_value
         
     for i in range(0, len(holes)):
-        random_value = random.randint(-5, 5) * e
+        random_value = random.randint(-1, 1) * e
         holes[i, 1] = holes[i, 1] + random_value
-        random_value = random.randint(-5, 5) * e
+        random_value = random.randint(-1, 1) * e
         holes[i, 2] = holes[i, 2] + random_value
 
     return [balls, holes]
