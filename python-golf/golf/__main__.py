@@ -1,5 +1,6 @@
 import argparse
 import math
+import random
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -68,6 +69,25 @@ def generate_data(n):
 
     return [balls, holes]
 
+def introduce_variance(balls, holes):
+    e = 1e-9
+
+    random.seed()
+
+    for i in range(0, len(balls)):
+        random_value = random.randint(-5, 5) * e
+        balls[i, 1] = balls[i, 1] + random_value
+        random_value = random.randint(-5, 5) * e
+        balls[i, 2] = balls[i, 2] + random_value
+        
+    for i in range(0, len(holes)):
+        random_value = random.randint(-5, 5) * e
+        holes[i, 1] = holes[i, 1] + random_value
+        random_value = random.randint(-5, 5) * e
+        holes[i, 2] = holes[i, 2] + random_value
+
+    return [balls, holes]
+
 def plot_data(balls, holes):
     n = balls.shape[0]
 
@@ -82,6 +102,7 @@ def plot_data(balls, holes):
 
     balls_center = get_mass_center(balls)
     holes_center = get_mass_center(holes)
+
     x_center = [balls_center[0], holes_center[0]]
     y_center = [balls_center[1], holes_center[1]]
 
@@ -350,6 +371,12 @@ def main():
     else:
         n = int(args.n)
         [balls, holes] = generate_data(n)
+
+    balls_center = get_mass_center(balls)
+    holes_center = get_mass_center(holes)
+
+    if (balls_center[0] == holes_center[0]) and (holes_center[1] == balls_center[1]):
+        introduce_variance(balls, holes)
 
     if not silent_mode: 
         print('balls = {}'.format((np.transpose(balls))[:][0]))
