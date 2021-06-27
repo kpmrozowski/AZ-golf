@@ -10,13 +10,54 @@ from .helpers import doIntersect
 def parse_arguments():
     parser = argparse.ArgumentParser()
     # parser.add_argument("input_file", help="File path for a file to read")
-    parser.add_argument("n", help="Balls/holes count")
+    parser.add_argument("--n", help="Balls/holes count")
     parser.add_argument("--silent", help="Don't print debug information", dest='silent_mode', action='store_true')
+    parser.add_argument("--input", help="Input file to load with balls and holes coordinates")
     args = parser.parse_args()
 
     np.set_printoptions(precision=2)
 
     return args
+
+def load_file(input_file):
+    f = open(input_file, 'r')
+
+    mode = 'holes'
+    index = 0
+
+    holes = []
+    balls = []
+
+    for line in f:
+        if(line.lower().startswith("holes")):
+            mode = 'holes'
+            continue
+        elif(line.lower().startswith("balls")):
+            mode = 'balls'
+            continue
+
+        coords = line.rstrip('\n').split(' ')
+        x = float(coords[0])
+        y = float(coords[1])
+
+        if mode == 'balls':
+            balls.append([index, x, y])
+        else:
+            holes.append([index, x, y])
+
+        index = index + 1
+    
+    balls = np.array(balls)
+    holes = np.array(holes)
+
+    n = balls.shape[0]
+    n_holes = holes.shape[0]
+
+    if n != n_holes:
+        print("Number of holes is not equal to number of balls!")
+        return []
+        
+    return [n, balls, holes]
 
 def generate_data(n):
     balls = np.random.rand(n, 2)
@@ -302,10 +343,13 @@ def main():
     global n
     global silent_mode
 
-    n = int(args.n)
     silent_mode = True if args.silent_mode else False
 
-    [balls, holes] = generate_data(n)
+    if(args.input):
+        [n, balls, holes] = load_file(args.input)
+    else:
+        n = int(args.n)
+        [balls, holes] = generate_data(n)
 
     if not silent_mode: 
         print('balls = {}'.format((np.transpose(balls))[:][0]))
